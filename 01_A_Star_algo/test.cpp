@@ -22,5 +22,7 @@ int main()
         n->print();
         cout << "\n";
     }
+
+    
     return 0;
 }

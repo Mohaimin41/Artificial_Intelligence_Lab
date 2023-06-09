@@ -45,7 +45,7 @@ std::vector<search_node *> search_node::get_neighbours()
     std::vector<search_node *> neighbours;
 
     int row = _blank / _grid_size, col = _blank % _grid_size;
-    
+
     if (_move_from_parent != 0 && row - 1 >= 0)
     {
         search_node *temp = new search_node(this, _grid_size, _num_moves_from_init_node + 1, 0);
