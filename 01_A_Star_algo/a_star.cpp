@@ -205,7 +205,7 @@ void a_star::solve_algo(int option)
 {
     search_node *goal;
     _expanded = _explored = 0;
-    if (option == 1)
+    if (option == manhattan)
     {
         goal = find_goal(_init);
     }
@@ -228,6 +228,21 @@ a_star::a_star(int size, search_node *init)
 
 a_star::~a_star()
 {
+    std::stack<search_node *> nodes;
+    search_node *temp = _init;
+
+    while (temp)
+    {
+        nodes.push(temp);
+
+        temp = temp->get_parent();
+    }
+    while (!nodes.empty())
+    {
+        temp = nodes.top();
+        nodes.pop();
+        delete temp;
+    }
 }
 
 void a_star::solve(int option)

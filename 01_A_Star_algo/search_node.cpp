@@ -5,8 +5,16 @@
 search_node *search_node::gen_neighbour(int move)
 {
     int goal_blank_pos = -1;
-    search_node *temp = new search_node(
-        this, _grid_size, _num_moves_from_init_node + 1);
+    search_node *temp;
+    try
+    {
+        temp = new search_node(this, _grid_size, _num_moves_from_init_node + 1);
+    }
+    catch (const std::bad_alloc &e)
+    {
+        std::cout << "Allocation failed @line 11 in search_node.cpp: " << e.what()
+                  << '\n';
+    }
 
     for (int i = 0; i < _grid_size * _grid_size; i++)
     {
