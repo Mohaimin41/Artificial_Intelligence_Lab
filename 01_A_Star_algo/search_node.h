@@ -25,11 +25,12 @@ private:
     int _insertion_index;
     int _blank;
     bool _visited;
-    search_node* gen_neighbour(int);
+    search_node *gen_neighbour(int);
 
 public:
     search_node();
-    search_node(search_node*, int, int);
+    search_node(const search_node &);
+    search_node(const search_node *);
     search_node(search_node *, int, int, int);
     ~search_node();
     int *get_grid();
