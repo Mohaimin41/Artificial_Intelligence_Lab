@@ -33,3 +33,6 @@
 
 # logs
 *.log
+
+# vscode
+.vscode\*
