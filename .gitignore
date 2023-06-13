@@ -35,4 +35,4 @@
 *.log
 
 # vscode
-.vscode\*
+.vscode/*
