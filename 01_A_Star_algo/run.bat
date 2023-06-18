@@ -1,0 +1,1 @@
+g++ -w -g a_star.cpp search_node.cpp test.cpp

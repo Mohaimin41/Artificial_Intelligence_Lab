@@ -7,7 +7,6 @@
 #define manhattan 30
 #define hamming 31
 
-
 class CompareHamming
 {
 private:
@@ -25,6 +24,7 @@ private:
 public:
     bool operator()(search_node *, search_node *);
 };
+
 class a_star
 {
 private:
@@ -34,8 +34,10 @@ private:
     int _expanded;
     std::priority_queue<search_node *, std::vector<search_node *>, CompareHamming> _pq;
     std::priority_queue<search_node *, std::vector<search_node *>, CompareManhattan> _mpq;
+    std::vector<search_node*> _closed_list;
     bool is_solvable(search_node *);
     bool is_goal(search_node *);
+    bool is_visited(search_node*);
     int inversions(search_node *);
     int merge(int[], int, int, int);
     int merge_sort(int[], int, int);

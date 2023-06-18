@@ -39,6 +39,23 @@ bool a_star::is_goal(search_node *test_node)
     return true;
 }
 
+bool a_star::is_visited(search_node *test_node)
+{
+    for (auto node : _closed_list)
+    {
+        int *grid1 = node->get_grid(), *grid2 = test_node->get_grid();
+        for (int i = 0; i < _size * _size; i++)
+        {
+            if (grid1[i] != grid2[i])
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+    return false;
+}
+
 int a_star::inversions(search_node *node)
 {
     int arr[_size * _size - 1] = {0};
@@ -123,9 +140,9 @@ void a_star::print_solve(search_node *goal)
     while (temp)
     {
         nodes.push(temp);
-
         temp = temp->get_parent();
     }
+
     while (!nodes.empty())
     {
         temp = nodes.top();
@@ -147,22 +164,25 @@ search_node *a_star::find_goal_hamming(search_node *init_node)
     search_node *temp = _pq.top();
     _pq.pop();
     ++_explored;
-    temp->set_visited(true);
+    _closed_list.push_back(temp);
 
     while (!is_goal(temp))
     {
         std::vector<search_node *> neighbours = temp->get_neighbours();
         for (auto node : neighbours)
         {
-            if (node->is_visited())
+            if (is_visited(node))
+            {
+                delete node;
                 continue;
+            }
             _pq.push(node);
             ++_expanded;
         }
         temp = _pq.top();
         _pq.pop();
         ++_explored;
-        temp->set_visited(true);
+        _closed_list.push_back(temp);
     }
 
     return temp;
@@ -170,27 +190,28 @@ search_node *a_star::find_goal_hamming(search_node *init_node)
 
 search_node *a_star::find_goal(search_node *init_node)
 {
+    search_node *temp = init_node;
     _mpq.push(init_node);
     ++_expanded;
-    search_node *temp = _mpq.top();
-    _mpq.pop();
-    ++_explored;
-    temp->set_visited(true);
 
     while (!is_goal(temp))
     {
         std::vector<search_node *> neighbours = temp->get_neighbours();
+
         for (auto node : neighbours)
         {
-            if (node->is_visited())
+            if (is_visited(node))
+            {
+                delete node;
                 continue;
+            }
             _mpq.push(node);
             ++_expanded;
         }
         temp = _mpq.top();
         _mpq.pop();
         ++_explored;
-        temp->set_visited(true);
+        _closed_list.push_back(temp);
     }
 
     return temp;
@@ -228,20 +249,41 @@ a_star::a_star(int size, search_node *init)
 
 a_star::~a_star()
 {
-    std::stack<search_node *> nodes;
-    search_node *temp = _init;
+    // std::stack<search_node *> nodes;
+    // search_node *temp = _init;
 
-    while (temp)
+    // while (temp)
+    // {
+    //     nodes.push(temp);
+
+    //     temp = temp->get_parent();
+    // }
+    // while (!nodes.empty())
+    // {
+    //     temp = nodes.top();
+    //     nodes.pop();
+    //     delete temp;
+    // }
+    for (auto node : _closed_list)
     {
-        nodes.push(temp);
-
-        temp = temp->get_parent();
+        delete node;
     }
-    while (!nodes.empty())
+
+    while (!_pq.empty() || !_mpq.empty())
     {
-        temp = nodes.top();
-        nodes.pop();
-        delete temp;
+        if (!_pq.empty())
+        {
+            search_node *temp = _pq.top();
+            _pq.pop();
+            delete temp;
+        }
+        if (!_mpq.empty())
+        {
+
+            search_node *temp = _mpq.top();
+            _mpq.pop();
+            delete temp;
+        }
     }
 }
 
@@ -303,10 +345,9 @@ int CompareManhattan::manhattan_count(search_node *first)
     {
         if (!f_grid[i])
             continue;
-        int correct_row = f_grid[i] / first->get_size(),
-            correct_col = f_grid[i] % first->get_size(),
+        int correct_row = (f_grid[i] - 1) / first->get_size(),
+            correct_col = (f_grid[i] - 1) % first->get_size(),
             curr_row = i / first->get_size(), curr_col = i % first->get_size();
-
         f_val += abs(correct_col - curr_col) + abs(curr_row - correct_row);
     }
 

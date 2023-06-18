@@ -24,7 +24,6 @@ private:
     int _move_from_parent;
     int _insertion_index;
     int _blank;
-    bool _visited;
     search_node *gen_neighbour(int);
 
 public:
@@ -38,8 +37,6 @@ public:
     void print();
     std::vector<search_node *> get_neighbours();
     search_node *get_parent();
-    bool is_visited();
-    void set_visited(bool);
     int get_blank();
     int get_movecount_from_init();
     int get_size();

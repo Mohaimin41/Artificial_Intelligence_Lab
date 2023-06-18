@@ -13,7 +13,7 @@ search_node *search_node::gen_neighbour(int move)
     catch (const std::bad_alloc &e)
     {
         std::cout << "Allocation failed @line 11 in search_node.cpp: " << e.what()
-                  << '\n';
+                  << '\n' ;
     }
 
     for (int i = 0; i < _grid_size * _grid_size; i++)
@@ -46,7 +46,7 @@ search_node *search_node::gen_neighbour(int move)
 
 search_node::search_node() : _parent(nullptr), _grid_size(0), _grid(nullptr),
                              _num_moves_from_init_node(0), _move_from_parent(no_move),
-                             _insertion_index(-1), _blank(-1), _visited(false)
+                             _insertion_index(-1), _blank(-1)
 {
 }
 
@@ -54,7 +54,7 @@ search_node::search_node(const search_node &node)
     : _parent(node._parent), _grid_size(node._grid_size),
       _num_moves_from_init_node(node._num_moves_from_init_node),
       _move_from_parent(node._move_from_parent), _insertion_index(node._insertion_index),
-      _blank(node._blank), _visited(node._visited)
+      _blank(node._blank)
 {
     _grid = new int[_grid_size * _grid_size];
     for (int i = 0; i < _grid_size * _grid_size; i++)
@@ -65,7 +65,7 @@ search_node::search_node(const search_node *node)
     : _parent(node->_parent), _grid_size(node->_grid_size),
       _num_moves_from_init_node(node->_num_moves_from_init_node),
       _move_from_parent(node->_move_from_parent), _insertion_index(node->_insertion_index),
-      _blank(node->_blank), _visited(node->_visited)
+      _blank(node->_blank)
 {
     _grid = new int[_grid_size * _grid_size];
     for (int i = 0; i < _grid_size * _grid_size; i++)
@@ -75,7 +75,7 @@ search_node::search_node(const search_node *node)
 search_node::search_node(search_node *parent, int grid_size, int num_moves_from_init_node, int move_from_parent)
     : _parent(parent), _grid_size(grid_size), _grid(new int[_grid_size * _grid_size]),
       _num_moves_from_init_node(num_moves_from_init_node),
-      _move_from_parent(move_from_parent), _insertion_index(0), _blank(0), _visited(false)
+      _move_from_parent(move_from_parent), _insertion_index(0), _blank(0)
 {
 }
 
@@ -145,16 +145,6 @@ std::vector<search_node *> search_node::get_neighbours()
 search_node *search_node::get_parent()
 {
     return _parent;
-}
-
-bool search_node::is_visited()
-{
-    return _visited;
-}
-
-void search_node::set_visited(bool val)
-{
-    _visited = val;
 }
 
 int search_node::get_blank()
