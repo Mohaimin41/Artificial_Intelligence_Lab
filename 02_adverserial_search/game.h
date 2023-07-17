@@ -104,6 +104,8 @@ struct state
     ~state()
     {
         delete[] board;
+        delete p1;
+        delete p2;
     }
 };
 

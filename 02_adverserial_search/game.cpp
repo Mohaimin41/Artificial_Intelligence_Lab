@@ -311,7 +311,7 @@ int player::make_move(int player_num, int *board, player *opponent)
                 // update alpha
                 if (alpha < value)
                 {
-                    chosen_cell = player_num ? children[move - 1]->chosen_cell + 7 : children[move - 1]->chosen_cell ;
+                    chosen_cell = children[move - 1]->chosen_cell ;
                     alpha = value;
                 }
             }
@@ -319,7 +319,7 @@ int player::make_move(int player_num, int *board, player *opponent)
             {
                 if (beta > value)
                 {
-                    chosen_cell = player_num ? children[move - 1]->chosen_cell + 7 : children[move - 1]->chosen_cell ;
+                    chosen_cell = children[move - 1]->chosen_cell ;
                     beta = value;
                 }
             }
