@@ -5,6 +5,8 @@
 #include "1905041_defs.h"
 #include "1905041_dec_tree.h"
 
+extern std::vector<struct attribute *> *ALL_ATTRIBS;
+
 /**
  * @brief   make a new leaf node with class_name as its classification
  * @warning must set leaf->parent and leaf->parent_choice of returned leaf node*
@@ -15,31 +17,37 @@
 node *mkleaf(std::string class_name)
 {
     struct node *leaf = new struct node();
+
     leaf->child_list_head = nullptr; // no child
     leaf->is_leaf = true;
-    leaf->tested_attribute = nullptr; // no attribute is tested
-    leaf->next_sibling = nullptr;     // no sibling at start
+    leaf->next_sibling = nullptr; // no sibling at start
+    leaf->classifcation = class_name;
+    leaf->parent = nullptr;
+    leaf->parent_node_choice = "";
+    leaf->tested_attrib_name = ""; // no attribute is tested
     return leaf;
 }
 
 /**
- * @brief   Get the tree node object from given common nodes vector
- *          that has same attribute as given attrib, if none has the
- *          attribute, returns nullptr
- * @param   common_nodes    the ready made vector of node*
- * @param   attrib  the attribute returned node should have
- * @return  node* from common node vector
+ * @brief   make and return a node* for tree, with given attribute* name
+ *          as tested_attribute name
+ * @warning must set node->parent and node->parent_choice of returned node*
+ *          at decision_tree() function
+ *
+ * @param   attrib  attribute that is tested in this node
+ * @return  node* intermediate node in tree
  */
-node *get_tree_node(std::vector<struct node *> *common_nodes, attribute *attrib)
+node *mk_tree_node(struct attribute *attrib)
 {
-    for (auto n : *common_nodes)
-    {
-        if (n->tested_attribute->attrib_name == attrib->attrib_name)
-        {
-            return n;
-        }
-    }
-    return nullptr;
+    struct node *tree_node = new struct node();
+    tree_node->child_list_head = nullptr; // no kids
+    tree_node->classifcation = "";        // it is not a leaf
+    tree_node->is_leaf = false;
+    tree_node->tested_attrib_name = attrib->attrib_name;
+    tree_node->next_sibling = nullptr;  // no siblings
+    tree_node->parent = nullptr;        // no parent
+    tree_node->parent_node_choice = ""; // no parent
+    return tree_node;
 }
 
 /**
@@ -55,7 +63,6 @@ void add_child(node *parent, node *kid)
         // no child, set up child list
         parent->child_list_head = kid;
         parent->child_list_head->next_sibling = nullptr;
-        return;
     }
     else
     {
@@ -74,12 +81,12 @@ void add_child(node *parent, node *kid)
 }
 
 /**
- * @brief   returns the class name if given list of example are all of same
- *          class, empty string("") otherwise
+ * @brief   returns the class name if given vector* of example* has same
+ *          class in all samples, empty string("") otherwise
  * @param   samples vector of example*
  * @return  std::string  name of the same class or "" otherwise
  */
-std::string is_all_same_class(std::vector<struct example *> *samples)
+std::string are_all_of_same_class(std::vector<struct example *> *samples)
 {
     std::string same_class = "";
     if (!samples->size())
@@ -92,7 +99,7 @@ std::string is_all_same_class(std::vector<struct example *> *samples)
     for (auto s : *samples)
     {
         // return "" on mismatch
-        if (!(s->classification == same_class))
+        if (s->classification != same_class)
         {
             return std::string("");
         }
@@ -102,16 +109,16 @@ std::string is_all_same_class(std::vector<struct example *> *samples)
 }
 
 /**
- * @brief   Get the name of majority class in given set of samples
+ * @brief   Get the name of majority class in given vector* of example*
  *
- * @param   samples    vector of example*
+ * @param   samples    vector* of example*
  * @return  std::string class name
  */
 std::string get_majority_class(std::vector<struct example *> *samples)
 {
     // classes that are present in given example set
     std::unordered_set<std::string> present_classes;
-    // class name to instance count mapping
+    // class name to class instance count mapping
     std::unordered_map<std::string, int> instance_count;
     for (auto e : *samples)
     {
@@ -140,53 +147,60 @@ std::string get_majority_class(std::vector<struct example *> *samples)
 }
 
 /**
- * @brief   populates new sample set from given samples set matching the given
- *          value for given attribute
+ * @brief   returns new sample vector* from given samples vector* matching
+ *          the given value for given attribute
  *
- * @param   new_samples empty vector of example* to be populated
- * @param   samples source vector of example*
- * @param   attrib  attribute being tested
+ * @param   samples source vector* of example*
+ * @param   attrib  attribute* being tested
  * @param   attrib_value    string value of attribute
+ * @return  std::vector<struct example *> *
  */
-void get_samples_matching_value(
-    std::vector<struct example *> *new_samples,
+std::vector<struct example *> *get_samples_matching_value(
     std::vector<struct example *> *samples,
     struct attribute *attrib, std::string attrib_value)
 {
+    std::vector<struct example *> *new_samples =
+        new std::vector<struct example *>();
+
     int idx_of_attrib = -1;
     // find index of attribute in global attribute vector
-    for (int i = 0; i < ALL_ATTRIBS.size(); i++)
+    for (int i = 0; i < ALL_ATTRIBS->size(); i++)
     {
-        if (ALL_ATTRIBS[i]->attrib_name == attrib->attrib_name)
+        if (ALL_ATTRIBS->at(i)->attrib_name == attrib->attrib_name)
         {
             idx_of_attrib = i;
             break;
         }
     }
-    // use the index to get value of attribute in example and compare
+    // populate new samples vector
     for (auto s : *samples)
     {
-        if (s->ex_val_for_attrib[idx_of_attrib] == attrib_value)
+        if (s->ex_val_for_attrib->at(idx_of_attrib) == attrib_value)
         {
             new_samples->push_back(s);
         }
     }
+    return new_samples;
 }
 
 /**
  * @brief   calculate entropy on given list of samples, finds unique classes
  *          and calculates entropy on them(absent classes contribute 0 anyway)
  * @param   samples vector of example*
- * @return  doouble entropy value 
+ * @return  doouble entropy value
  */
 double find_entropy(std::vector<struct example *> *samples)
 {
-    int num_samples = samples->size();
+    if (samples->size() == 0) // no entropy if no example
+    {
+        return 0.0;
+    }
     double entropy = 0.0;
+    int num_samples = samples->size();
 
     // classes that are present in given example set
     std::unordered_set<std::string> present_classes;
-    // class name to instance count mapping
+    // class name to class instance count mapping
     std::unordered_map<std::string, int> instance_count;
     for (auto e : *samples)
     {
@@ -200,6 +214,10 @@ double find_entropy(std::vector<struct example *> *samples)
         instance_count[e->classification] += 1;
     }
 
+    // entropy of attribute V = H(V), with V having values v1...vk
+    // each value has probability of apparing in the examples = P(vk)
+    // H(V) = sum_k ( P(vk) log_2 ( 1 / P(vk) ) )
+    // P(vk) = (num of sample with V=vk) / ( num of sample )
     for (auto elem : instance_count)
     {
         entropy += ((elem.second * 1.0) / num_samples) *
@@ -210,9 +228,9 @@ double find_entropy(std::vector<struct example *> *samples)
 }
 
 /**
- * @brief   caculate importance(information gain) of attribute with given 
+ * @brief   caculate importance(information gain) of attribute with given
  *          list of examples
- * 
+ *
  * @param   attrib  attribute*
  * @param   samples vector of examples*
  * @return  double  importance value
@@ -221,19 +239,32 @@ double find_importance(attribute *attrib,
                        std::vector<struct example *> *samples)
 {
     int num_samples = samples->size();
+    if (samples->size() == 0) // shouldn't be reached but setting a fail safe
+    {
+        return 0;
+    }
+
+    // Information Gain = Entropy(current node) - Remainder
+    // Entropy at current node
     double prev_entropy = find_entropy(samples);
 
     double rem = 0.0;
-
-    for (auto val : attrib->attrib_values)
+    // Attribute A has v1,...,vk distinct values
+    // Remainder(Attribute A) =
+    //          sum_k ( P(A=vk at current node) * Entropy(Child node with A=vk))
+    // P(A = vk at current node ) = (num of example with A=vk)
+    //                              / (num of example)
+    for (auto val : *(attrib->attrib_values)) // loop over each value vk
     {
-        std::vector<struct example *> splitted_sample;
-        get_samples_matching_value(&splitted_sample, samples, attrib, val);
+        // get the examples that would be in the child node with A=vk
+        std::vector<struct example *> *splitted_sample =
+            get_samples_matching_value(samples, attrib, val); // SPLITTED_SAMPLE
 
-        int split_sample_count = splitted_sample.size();
+        int split_sample_count = splitted_sample->size();
 
         rem += ((split_sample_count * 1.0) / num_samples) *
-               find_entropy(&splitted_sample);
+               find_entropy(splitted_sample);
+        delete splitted_sample; // SPLITTED_SAMPLE
     }
 
     return prev_entropy - rem;
@@ -265,23 +296,31 @@ attribute *get_best_attrib(
     return best_attrib;
 }
 
+/**
+ * @brief   return root node* of decision tree, recursively called
+ *
+ * @param   samples   pointer to vector of example*
+ * @param   attribs   pointer to vector of attribute*
+ * @param   par_samples   pointer to parent's vector of example*
+ * @return  node*
+ */
 node *decision_tree(
     std::vector<struct example *> *samples,
     std::vector<struct attribute *> *attribs,
     std::vector<struct example *> *par_samples)
 {
-    std::string name_of_same_class = is_all_same_class(samples);
-    if (!(name_of_same_class == ""))
-    {
-        // if all examples have the same classification then
-        // return the classification
-        return mkleaf(name_of_same_class);
-    }
-    else if (samples->empty())
+    std::string name_of_same_class = are_all_of_same_class(samples);
+    if (samples->empty())
     {
         // if examples is empty then return PLURALITY-VALUE(parent examples)
         std::string parent_majority_class = get_majority_class(par_samples);
         return mkleaf(parent_majority_class);
+    }
+    else if (name_of_same_class != "")
+    {
+        // if all examples have the same classification then
+        // return the classification
+        return mkleaf(name_of_same_class);
     }
     else if (attribs->empty())
     {
@@ -291,38 +330,40 @@ node *decision_tree(
     }
     else
     {
-        // A ←argmax_(a ∈ attributes)( IMPORTANCE(a, examples))
+        // A ←argmax_(a ∈ attributes)( IMPORTANCE(a, examples) )
         struct attribute *best_attrib = get_best_attrib(attribs, samples);
         // tree ← a new decision tree with root test A
-        struct node *subtree_root = get_tree_node(&COMMON_NODES, best_attrib);
-
+        struct node *subtree_root = mk_tree_node(best_attrib);
         // attributes − A
-        std::vector<struct attribute *> new_attribs;
+        std::vector<struct attribute *> *new_attribs =
+            new std::vector<struct attribute *>(); // NEW_ATTRIBS
 
         for (auto prev_attr : *attribs)
         {
-            if (!(prev_attr->attrib_name == best_attrib->attrib_name))
+            if (prev_attr->attrib_name != best_attrib->attrib_name)
             {
-                new_attribs.push_back(prev_attr);
+                new_attribs->push_back(prev_attr);
             }
         }
-        //for each value v_k of A do
-        for (auto value : best_attrib->attrib_values)
+        
+        // for each value v_k of A do
+        for (auto value : *(best_attrib->attrib_values))
         {
             // exs ← {e : e ∈ examples and e.A = v_k}
-            std::vector<struct example *> new_samples;
-            get_samples_matching_value(&new_samples,
-                                       samples, best_attrib, value);
+            std::vector<struct example *> *new_samples =
+                get_samples_matching_value(samples, best_attrib, value); // NEW_SAMPLES
+             
+            // subtree ← DECISION-TREE-LEARNING(exs, attributes − A, examples)
+            struct node *child = decision_tree(new_samples,
+                                               new_attribs, samples);
 
-            // subtree ← DECISION-TREE-LEARNING(exs, attributes − A, examples)   
-            struct node *child = decision_tree(&new_samples,
-                                               &new_attribs, samples);
-
-            // add a branch to tree with label (A = v_k) and subtree subtree   
+            // add a branch to tree with label (A = v_k) and subtree subtree
             child->parent = subtree_root;
             child->parent_node_choice = value;
             add_child(subtree_root, child);
+            delete new_samples; // NEW_SAMPLES
         }
+        delete new_attribs; // NEW_ATTRIBS
         return subtree_root;
     }
     return nullptr;

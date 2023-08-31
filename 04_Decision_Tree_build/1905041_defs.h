@@ -1,5 +1,14 @@
+#pragma once
 #include <vector>
 #include <string>
+#include <filesystem>
+#include <fstream>
+#include <iostream>
+#include <chrono>
+#include <random>
+#include <cmath>
+#include <algorithm>
+#include <cstdlib>
 
 #ifndef DEFS
 #define DEFS
@@ -9,18 +18,17 @@ struct example;
 struct node;
 
 struct node*                    mkleaf(std::string class_name);
-struct node*                    get_tree_node(
-                                    std::vector<struct node*>*,
-                                    struct attribute* attrib
-                                    );
+struct node*                    mk_tree_node(struct attribute* attrib);
 void                            add_child(
-                                    struct node* parent, struct node* kid);                                    
-std::string                     is_all_same_class(std::vector<struct example*>);
+                                    struct node* parent, struct node* kid);
+void                            print_tree(struct node* root, int level);                                 
+std::string                     are_all_of_same_class(
+                                    std::vector<struct example*>
+                                    );
 std::string                     get_majority_class(
                                     std::vector<struct example*>* examples
                                     );
-void                            get_samples_matching_value(
-                                    std::vector<struct example*>* new_samples,
+std::vector<struct example*>*   get_samples_matching_value(
                                     std::vector<struct example*>* samples,
                                     struct attribute* attrib,
                                     std::string attrib_value
@@ -37,6 +45,40 @@ struct node*                    decision_tree(
                                     std::vector<struct example*>* samples,
                                     std::vector<struct attribute*>* attribs,
                                     std::vector<struct example*>* par_samples
+                                    );           
+std::vector<struct attribute*>* init_attribs(
+                                    const std::filesystem::directory_entry *
+                                    fileentry
                                     );
+std::vector<struct example*>*   init_samples(
+                                    const std::filesystem::directory_entry *
+                                    fileentry
+                                    );
+double                          get_average(std::vector<double> &numbers);
+double                          get_standard_deviation(
+                                    std::vector<double> &numbers
+                                    );
+std::vector<struct example *> * get_training_set(
+                                    std::vector<struct example *>* src_samples, 
+                                    double training_percentage);
+void                            split_examples(
+                                    std::vector<struct example *> * training_set, 
+                                    std::vector<struct example *> * testing_set,
+                                    double percentage
+                                    );
+struct node *                   get_class(
+                                    struct example *sample, struct node *root
+                                    );
+std::unordered_map<std::string, int>*   get_attrib_idx_map();
+std::pair<int,int>              run_single_test(
+                                    std::vector<struct example*>* training_set,
+                                    struct node* root
+                                );
+void                            start_output(std::ofstream* output_file);
+void                            end_output(
+                                    std::ofstream* output_file,
+                                    std::vector<double> &all_accuracies
+);
+void                            print_char_line(char ch);
 
 #endif // DEFS
