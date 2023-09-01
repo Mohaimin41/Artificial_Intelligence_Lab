@@ -17,7 +17,7 @@ std::ofstream output_file("1905041_output.txt");
 
 int main(int argc, char **argv)
 {
-    if (argc == 1)
+    if (argc < 3)
     {
         std::cout << "Usage: .\\1905041.exe <data folder> ";
         std::cout << "<number of iterations>\n";

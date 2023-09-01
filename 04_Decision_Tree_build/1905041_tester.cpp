@@ -54,19 +54,13 @@ std::pair<int, int> run_single_test(std::vector<struct example *> *training_set,
 }
 
 /**
- * @brief   Get random training samples from given vector* sourrc example*
- *
- * @param   src_samples pointer to vector of source example*
- * @param   training_percentage the percentage of example* to be chosen
- * @return  std::vector<struct example *>*:  vector* to training example*(s)
- * @warning training_percentage must be between 0-100
+ * @brief   split and put examples from global vector* to training and test 
+ *          example* vectors, training vector size corresponds to percentage
+ * 
+ * @param   training_set    pointer to vector of example*
+ * @param   testing_set pointer to vector of example* 
+ * @param   percentage  fraction of ALL_EXAMPLES that would be in training vector
  */
-std::vector<struct example *> *get_training_set(
-    std::vector<struct example *> *src_samples, double training_percentage)
-{
-    return src_samples;
-}
-
 void split_examples(std::vector<struct example *> *training_set,
                     std::vector<struct example *> *testing_set,
                     double percentage)

@@ -28,36 +28,6 @@ std::string trim(const std::string &s)
 }
 
 /**
- * @brief   recursively print tree from given root
- *
- * @param   root    node*, root of tree
- * @param   level   tree depth, increases by 1 in recursive call
- */
-void print_tree(struct node *root, int level)
-{
-    for (int i = 0; i < level; i++)
-    {
-        std::cout << "..";
-    }
-    std::cout << "(" << root->parent_node_choice << ")";
-    if (root->is_leaf)
-    {
-        std::cout << "<<" << root->classifcation << ">>"
-                  << "\n";
-    }
-    else
-    {
-        std::cout << root->tested_attrib_name << "\n\n";
-        struct node *tail = root->child_list_head;
-        while (tail)
-        {
-            print_tree(tail, level + 1);
-            tail = tail->next_sibling;
-        }
-    }
-}
-
-/**
  * @brief   return pointer to vector of attribute* with all possible attributes
  *          from given file
  *
@@ -180,55 +150,65 @@ std::vector<struct example *> *init_samples(
     data_file.close();
     return ALL_SAMPLES;
 }
-/**
- * @brief   write initial headers to output file
- * 
- * @param   output_file: ofstream pointer to file
- */
-void start_output(std::ofstream * output_file)
-{
-    *(output_file) << "ITERATION\t"
-                << "TRAINING SET SIZE\t"
-                << "TEST SET SIZE\t"
-                << "ACCURACY\n";
-    for (int i = 0; i < 80; i++)
-    {
-        *(output_file) << "_";
-    }
-    *(output_file) << "\n";
 
-}
-/**
- * @brief   write mean and SD of accuracy and close filestream
- * 
- * @param   output_file ofstream pointer to file
- * @param   all_accuracies: vector of all runs' accuracy
- */
-void end_output(std::ofstream *output_file, std::vector<double> &all_accuracies)
-{    
-    for (int i = 0; i < 80; i++)
-    {
-        *(output_file) << "_";
-    }
-    // write mean and SD of accuracy
-    *(output_file) << "\n";
-    *(output_file) << "Mean Accuracy: " << get_average(all_accuracies) << "\n";
-    *(output_file) << "Standard Deviation of Accuracy: "
-                << get_standard_deviation(all_accuracies);
-
-    // cleanup
-    output_file->close();
-}
 /**
  * @brief   prints char ch 80 times in a line, then a newline at end
- * 
+ *
  * @param   ch
  */
 void print_char_line(char ch)
 {
     for (int i = 0; i < 80; i++)
-        {
-            std::cout << ch;
-        }
-        std::cout << "\n";
+    {
+        std::cout << ch;
+    }
+    std::cout << "\n";
+}
+
+/**
+ * @brief   prints char ch 80 times in a line, then a newline at end
+ *          to the output file stream
+ * @param   output_file
+ * @param   ch
+ */
+void print_char_line_file(std::ofstream *output_file, char ch)
+{
+    for (int i = 0; i < 80; i++)
+    {
+        *(output_file) << ch;
+    }
+    *(output_file) << "\n";
+}
+
+/**
+ * @brief   write initial headers to output file
+ *
+ * @param   output_file: ofstream pointer to file
+ */
+void start_output(std::ofstream *output_file)
+{
+    *(output_file) << "ITERATION\t"
+                   << "TRAINING SET SIZE\t"
+                   << "TEST SET SIZE\t"
+                   << "ACCURACY\n";
+    print_char_line_file(output_file, '-');
+}
+
+/**
+ * @brief   write mean and SD of accuracy and close filestream
+ *
+ * @param   output_file ofstream pointer to file
+ * @param   all_accuracies: vector of all runs' accuracy
+ */
+void end_output(std::ofstream *output_file, std::vector<double> &all_accuracies)
+{
+    print_char_line_file(output_file, '-');
+    // write mean and SD of accuracy
+    *(output_file) << "\n";
+    *(output_file) << "Mean Accuracy: " << get_average(all_accuracies) << "\n";
+    *(output_file) << "Standard Deviation of Accuracy: "
+                   << get_standard_deviation(all_accuracies);
+
+    // cleanup
+    output_file->close();
 }
