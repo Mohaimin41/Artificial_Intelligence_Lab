@@ -12,7 +12,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 # Set environmental variable CXXFLAGS with some gcc flags
-set(CXXFLAGS -g -Wall -Wextra -Wpedantic)
+set(CXXFLAGS -g -Wall -Wextra -pedantic)
 
 # Add an executable called 1905041 to the project
 add_executable(1905041
