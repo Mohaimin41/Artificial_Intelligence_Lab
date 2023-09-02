@@ -54,26 +54,46 @@ std::pair<int, int> run_single_test(std::vector<struct example *> *training_set,
 }
 
 /**
- * @brief   split and put examples from global vector* to training and test 
- *          example* vectors, training vector size corresponds to percentage
- * 
+ * @brief   randomly split and put examples from global vector* to training
+ *          and test example* vectors, training vector size corresponds
+ *          to percentage of TOTAL_EXAMPLES
+ *
  * @param   training_set    pointer to vector of example*
- * @param   testing_set pointer to vector of example* 
+ * @param   testing_set pointer to vector of example*
  * @param   percentage  fraction of ALL_EXAMPLES that would be in training vector
  */
 void split_examples(std::vector<struct example *> *training_set,
                     std::vector<struct example *> *testing_set,
                     double percentage)
 {
-    int end_index = std::round(ALL_EXAMPLES->size() * (percentage / 100.0));
-
-    for (int i = 0; i < end_index; i++) {
-        training_set->push_back(ALL_EXAMPLES->at(i));
+    // make a copy of ALL_EXAMPLE
+    std::vector<struct example *> temp(*ALL_EXAMPLES);
+    if (temp.size() != ALL_EXAMPLES->size())
+    {
+        std::cout << "Copy error in split_example\n";
+        return;
     }
-    for (int i = end_index; i < ALL_EXAMPLES->size(); i++) {
-        testing_set->push_back(ALL_EXAMPLES->at(i));
+
+    // random number generators for shuffle
+    std::default_random_engine generator1(
+        std::chrono::system_clock::now().time_since_epoch().count());
+    // std::shuffle(temp.begin(), temp.end(), generator1);
+    std::mt19937 mt(generator1());
+    // shuffle temp vector, keeping ALL_EXAMPLES permutation intact
+    std::shuffle(temp.begin(), temp.end(), mt);
+
+    // split linearly the shuffled vector
+    int end_index = std::round(ALL_EXAMPLES->size() * (percentage / 100.0));
+    for (int i = 0; i < end_index; i++)
+    {
+        training_set->push_back(temp[i]);
+    }
+    for (int i = end_index; i < temp.size(); i++)
+    {
+        testing_set->push_back(temp[i]);
     }
 }
+
 /**
  * @brief   Get the leaf node at decision tree for given example*
  *          or nullpointer in case of errors. Called \b recursively
@@ -134,8 +154,7 @@ double get_standard_deviation(std::vector<double> &numbers)
     double sd = 0;
     for (auto k : numbers)
     {
-        // sum ( x_i - x_avg )^2 / N
-        // = sum ( (x_i - x_avg )^2 / N )
+        // sum ( x_i - x_avg )^2 / N = sum ( (x_i - x_avg )^2 / N )
         sd += ((k - avg) * (k - avg)) / (numbers.size() * 1.0);
     }
     // sd = sqrt ( sum ( x_i - x_avg )^2 / N)

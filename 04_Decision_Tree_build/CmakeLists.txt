@@ -1,0 +1,24 @@
+# Set the minimum required version of CMake to be 3.10
+cmake_minimum_required(VERSION 3.10)
+
+# Create a project named Decision_Tree_Making
+project(Decision_Tree_Making )
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
+
+
+# Set the variable CMAKE_CXX_STANDARD to 17
+# and the variable CMAKE_CXX_STANDARD_REQUIRED to True
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+# Set environmental variable CXXFLAGS with some gcc flags
+set(CXXFLAGS -g -Wall -Wextra -Wpedantic)
+
+# Add an executable called 1905041 to the project
+add_executable(1905041
+                1905041.cpp 1905041_dec_tree.cpp 1905041_helper.cpp 1905041_tester.cpp 1905041_node.cpp)
+
+# Use target_include_directories to include ${PROJECT_BINARY_DIR}
+target_include_directories(1905041 PUBLIC
+                           "${PROJECT_BINARY_DIR}"
+                           )

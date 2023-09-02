@@ -51,7 +51,6 @@ std::vector<struct attribute *> *init_attribs(
 
     std::ifstream metadata_file((*fileentry).path().c_str());
 
-    // read line by line till end
     while (getline(metadata_file, single_line))
     {
         if (single_line == "--attributes") // next lines will be attributes
@@ -119,7 +118,6 @@ std::vector<struct example *> *init_samples(
 
     std::ifstream data_file((*fileentry).path().c_str());
 
-    // read line by line till end
     while (getline(data_file, single_sample))
     {
         // tokenization
@@ -166,14 +164,14 @@ void print_char_line(char ch)
 }
 
 /**
- * @brief   prints char ch 80 times in a line, then a newline at end
+ * @brief   prints char ch 120 times in a line, then a newline at end
  *          to the output file stream
  * @param   output_file
  * @param   ch
  */
 void print_char_line_file(std::ofstream *output_file, char ch)
 {
-    for (int i = 0; i < 80; i++)
+    for (int i = 0; i < 120; i++)
     {
         *(output_file) << ch;
     }
@@ -188,9 +186,11 @@ void print_char_line_file(std::ofstream *output_file, char ch)
 void start_output(std::ofstream *output_file)
 {
     *(output_file) << "ITERATION\t"
+                   << "TOTAL EXAMPLES\t"
                    << "TRAINING SET SIZE\t"
                    << "TEST SET SIZE\t"
-                   << "ACCURACY\n";
+                   << "\%OF TOTAL EXAMPLES TRAINED\t"
+                   << "\%ACCURACY\n";
     print_char_line_file(output_file, '-');
 }
 
@@ -203,12 +203,9 @@ void start_output(std::ofstream *output_file)
 void end_output(std::ofstream *output_file, std::vector<double> &all_accuracies)
 {
     print_char_line_file(output_file, '-');
-    // write mean and SD of accuracy
     *(output_file) << "\n";
-    *(output_file) << "Mean Accuracy: " << get_average(all_accuracies) << "\n";
+    *(output_file) << "Mean Accuracy: " << get_average(all_accuracies) << "%\n";
     *(output_file) << "Standard Deviation of Accuracy: "
                    << get_standard_deviation(all_accuracies);
-
-    // cleanup
     output_file->close();
 }

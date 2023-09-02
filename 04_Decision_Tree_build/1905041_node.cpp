@@ -75,10 +75,10 @@ void add_child(node *parent, node *kid)
 }
 
 /**
- * @brief   recursively print tree from given root
+ * @brief   \b recursively print tree from given root
  *
  * @param   root    node*, root of tree
- * @param   level   tree depth, increases by 1 in recursive call
+ * @param   level   tree depth, increase by 1 in recursive call
  */
 void print_tree(struct node *root, int level)
 {

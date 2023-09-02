@@ -25,13 +25,12 @@ std::string are_all_of_same_class(std::vector<struct example *> *samples)
 
     for (auto s : *samples)
     {
-        // return "" on mismatch
         if (s->classification != same_class)
         {
             return std::string("");
         }
     }
-    // no mismatch
+
     return same_class;
 }
 
@@ -141,12 +140,16 @@ double find_entropy(std::vector<struct example *> *samples)
         instance_count[e->classification] += 1;
     }
 
-    // entropy of attribute V = H(V), with V having values v1...vk
+    // entropy of random variable V = H(V), with V having values v1...vk
     // each value has probability of apparing in the examples = P(vk)
     // H(V) = sum_k ( P(vk) log_2 ( 1 / P(vk) ) )
     // P(vk) = (num of sample with V=vk) / ( num of sample )
     for (auto elem : instance_count)
     {
+        if (elem.second == 0)
+        {
+            continue;
+        }
         entropy += ((elem.second * 1.0) / num_samples) *
                    std::log2(num_samples / (elem.second * 1.0));
     }
@@ -171,7 +174,6 @@ double find_importance(attribute *attrib,
         return 0;
     }
 
-    // Information Gain = Entropy(current node) - Remainder
     // Entropy at current node
     double prev_entropy = find_entropy(samples);
 
@@ -193,8 +195,7 @@ double find_importance(attribute *attrib,
                find_entropy(splitted_sample);
         delete splitted_sample; // SPLITTED_SAMPLE
     }
-
-    return prev_entropy - rem;
+    return prev_entropy - rem; // Information Gain = Entropy(current node) - Remainder
 }
 
 /**
@@ -272,14 +273,14 @@ node *decision_tree(
                 new_attribs->push_back(prev_attr);
             }
         }
-        
+
         // for each value v_k of A do
         for (auto value : *(best_attrib->attrib_values))
         {
             // exs ← {e : e ∈ examples and e.A = v_k}
             std::vector<struct example *> *new_samples =
                 get_samples_matching_value(samples, best_attrib, value); // NEW_SAMPLES
-             
+
             // subtree ← DECISION-TREE-LEARNING(exs, attributes − A, examples)
             struct node *child = decision_tree(new_samples,
                                                new_attribs, samples);
